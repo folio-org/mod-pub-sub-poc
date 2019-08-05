@@ -3,7 +3,6 @@ package org.folio.rest.impl;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.ApplicationConfig;
 import org.folio.spring.SpringContextUtil;
-import org.springframework.beans.factory.annotation.Value;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -14,7 +13,6 @@ import io.vertx.core.Vertx;
 public class InitAPIImpl implements InitAPI {
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> handler) {
-
     vertx.executeBlocking(
       future -> {
         SpringContextUtil.init(vertx, context, ApplicationConfig.class);

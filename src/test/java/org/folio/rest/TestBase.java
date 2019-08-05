@@ -2,7 +2,6 @@ package org.folio.rest;
 
 import static io.restassured.RestAssured.given;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
@@ -22,11 +21,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.unit.TestContext;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
@@ -42,7 +39,7 @@ import org.folio.test.junit.TestStartLoggingRule;
  */
 public class TestBase {
 
-  public static final String STUB_TENANT = "testlib";
+  public static final String STUB_TENANT = "diku";
 
   protected static final Header JSON_CONTENT_TYPE_HEADER = new Header(HttpHeaders.CONTENT_TYPE,
     ContentType.APPLICATION_JSON.getMimeType());
