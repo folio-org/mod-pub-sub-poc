@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Test request",
+  "additionalProperties": false,
+  "properties": {
+    "value": {
+      "type": "string",
+      "description": "payload",
+      "example": "sample payload"
+    },
+    "eventType": {
+      "type": "string",
+      "description": "type of event",
+      "example": "order_created"
+    }
+  },
+  "required": [
+    "value"
+  ]
+}

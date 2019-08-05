@@ -1,0 +1,23 @@
+#%RAML 1.0
+
+title: PubSub PoC API
+baseUri: https://github.com/folio-org/mod-pub-sub-poc
+version: v1
+
+documentation:
+  - title: mod-pub-sub-poc API
+    content: This documents the API calls related to PubSub functionality
+
+types:
+  testRequest: !include types/test/testRequest.json
+
+/publish:
+  displayName: Publish event
+  description: Publish event
+  post:
+    body:
+      application/json:
+        type: testRequest
+    responses:
+      204:
+        description: "Publish successful"
