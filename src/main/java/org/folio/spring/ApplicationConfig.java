@@ -2,9 +2,10 @@ package org.folio.spring;
 
 import static org.folio.kafka.KafkaUtil.getTopicName;
 
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -35,21 +36,18 @@ public class ApplicationConfig {
   }
 
   @Bean
-  public KafkaConsumer kafkaConsumer(@Value("${topic.tenant}") String tenant, @Value("${topic.type}") String eventType,
-                                     @Value("${bootstrap.server.url}") String bootstrapServerUrl,
-                                     @Value("${group.id}") String groupId,
-                                     LoggingHandler loggingHandler, Vertx vertx) {
-    Map<String, String> props = new HashMap<>();
-    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServerUrl);
-    props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-    props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
-    props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
-    KafkaConsumer<String, String> consumer = KafkaConsumer.create(vertx, props);
-    return consumer
-      .subscribe(getTopicName(tenant, eventType))
-      .handler(loggingHandler);
+  public List<KafkaConsumer<String, String>> kafkaConsumers(@Value("${topic.tenant}") String tenant,
+                                                            @Value("#{'${topic.types}'.split(',')}") List<String> eventTypes,
+                                                            @Value("${bootstrap.server.url}") String bootstrapServerUrl,
+                                                            @Value("${group.id}") String groupId,
+                                                            LoggingHandler loggingHandler, Vertx vertx) {
+    Map<String, String> config = consumerConfig(bootstrapServerUrl, groupId);
+    return eventTypes
+      .stream().map(eventType ->
+        KafkaConsumer.<String, String>create(vertx, config)
+          .subscribe(getTopicName(tenant, eventType))
+          .handler(loggingHandler))
+      .collect(Collectors.toList());
   }
 
   @Bean
@@ -64,18 +62,32 @@ public class ApplicationConfig {
 
   @Bean
   public AdminClient adminClient(@Value("${topic.tenant}") String tenant,
-                                 @Value("${topic.type}") String eventType,
+                                 @Value("#{'${topic.types}'.split(',')}") List<String> eventTypes,
                                  @Value("${bootstrap.server.url}") String bootstrapServerUrl) {
     Map<String, Object> configs = new HashMap<>();
     configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServerUrl);
     AdminClient adminClient = AdminClient.create(configs);
 
-    String topicName = getTopicName(tenant, eventType);
     int numPartitions = 1;
     short replicationFactor = 1;
-    adminClient.createTopics(Collections.singletonList(
-      new NewTopic(topicName, numPartitions, replicationFactor)));
+
+    List<NewTopic> topics = eventTypes.stream()
+      .map(eventType -> new NewTopic(getTopicName(tenant, eventType), numPartitions, replicationFactor))
+      .collect(Collectors.toList());
+
+    adminClient.createTopics(topics);
 
     return adminClient;
+  }
+
+  private Map<String, String> consumerConfig(@Value("${bootstrap.server.url}") String bootstrapServerUrl, @Value("${group.id}") String groupId) {
+    Map<String, String> props = new HashMap<>();
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServerUrl);
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+    props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+    props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+    return props;
   }
 }

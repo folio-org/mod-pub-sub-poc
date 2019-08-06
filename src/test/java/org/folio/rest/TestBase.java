@@ -5,9 +5,21 @@ import static io.restassured.RestAssured.given;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
+import org.folio.okapi.common.XOkapiHeaders;
+import org.folio.rest.client.TenantClient;
+import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.test.junit.TestStartLoggingRule;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestRule;
+
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.LogDetail;
@@ -21,17 +33,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.entity.ContentType;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.rules.TestRule;
-
-import org.folio.okapi.common.XOkapiHeaders;
-import org.folio.rest.client.TenantClient;
-import org.folio.rest.tools.utils.NetworkUtils;
-import org.folio.test.junit.TestStartLoggingRule;
 
 /**
  * Base test class for tests that use wiremock and vertx http servers,
@@ -69,6 +70,7 @@ public class TestBase {
 
     Locale.setDefault(Locale.US);  // enforce English error messages
 
+//    DeploymentOptions options = new DeploymentOptions().setInstances(3).setConfig(new JsonObject().put(HTTP_PORT, port));
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put(HTTP_PORT, port));
 
     RestAssured.port = port;
