@@ -1,6 +1,5 @@
 package org.folio.kafka.handler;
 
-import org.folio.rest.impl.InitAPIImpl;
 import org.springframework.stereotype.Component;
 
 import io.vertx.core.Handler;

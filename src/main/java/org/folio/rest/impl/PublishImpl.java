@@ -1,11 +1,10 @@
 package org.folio.rest.impl;
 
-import static org.folio.kafka.KafkaUtil.getTopicName;
-
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.folio.kafka.PubSubConsumerConfig;
 import org.folio.rest.jaxrs.model.TestRequest;
 import org.folio.rest.jaxrs.resource.Publish;
 import org.folio.rest.tools.utils.TenantTool;
@@ -34,7 +33,8 @@ public class PublishImpl implements Publish {
   @Override
   public void postPublish(TestRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
-    producer.write(new KafkaProducerRecordImpl<>(getTopicName(tenantId, entity.getEventType()), entity.getValue()));
+    PubSubConsumerConfig config = new PubSubConsumerConfig(tenantId, entity.getEventType());
+    producer.write(new KafkaProducerRecordImpl<>(config.getTopicName(), entity.getValue()));
     asyncResultHandler.handle(Future.succeededFuture(PublishImpl.PostPublishResponse.respond204()));
   }
 }

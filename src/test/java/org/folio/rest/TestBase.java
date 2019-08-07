@@ -71,7 +71,11 @@ public class TestBase {
     Locale.setDefault(Locale.US);  // enforce English error messages
 
 //    DeploymentOptions options = new DeploymentOptions().setInstances(3).setConfig(new JsonObject().put(HTTP_PORT, port));
-    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put(HTTP_PORT, port));
+    DeploymentOptions options = new DeploymentOptions().setConfig(
+      new JsonObject()
+        .put(HTTP_PORT, port)
+        .put("spring.configuration", "org.folio.spring.config.TestConfig")
+    );
 
     RestAssured.port = port;
 
